@@ -3,13 +3,10 @@ let mySound2;
 let mySound3;
 let mySound4;
 
+let grey;
+let green;
 
-let beats = [[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
-[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]]
-
-
+let rows = [];
 
 function preload() {
     soundFormats('wav', 'ogg');
@@ -20,144 +17,89 @@ function preload() {
 }
 
 function setup() {
-    let cnv = createCanvas(1500, 1000);
-    //cnv.mousePressed(canvasPressed);
-    background(220);
+    frameRate(60);
 
+    grey = color(200, 200, 200);
+    green = color(0, 255, 0);
+    
+    createCanvas(windowWidth, windowHeight);
+    background(220, 220, 220);
+    stroke(128, 128, 128)
 
+    let drumCount = 4;
+    let barCount = 2;
+    let beatsPerBar = 4;
 
+    let cellSize = 50;
+    let cellGapH = 5;
+    let cellGapV = 5;
 
+    let controlsXPos = 10 + cellSize / 2;
+    let controlsYPos = 10 + cellSize / 2;
 
+    // Initialize grid
+    for(let i = 0; i < drumCount; i++) {
+        let cells = [];
+        for(let j = 0; j < barCount*beatsPerBar; j++) {
+            let cellY = controlsYPos + (i * cellSize) + (i * cellGapV);
+            let cellX = controlsXPos + (j * cellSize) + (j * cellGapH);
+            cells.push(new Cell(cellX, cellY, cellSize, false, mySound));
+        }
+        rows.push(cells);
+    }
+    print(rows)
 }
 
 function draw() {
-    let grey = color(65);
-    let green = color(0, 204, 0);
-    frameRate(5);
-    //-------------------------------------------Row 1-----------------------------------------------------------------------------------
-    // 0,0 -----------------
-    for (let i = 0; i < beats[0].length; i++) {
+    background(220);
 
-        if (beats[0][i] == true) {
-            fill(green);
-            square(80 + (60 * i), 20, 55, 10)
+    for(let i = 0; i < rows.length; i ++) {
+        for(let j = 0; j < rows[i].length; j++) {
+            rows[i][j].draw();
         }
-        else {
-            fill(grey);
-            square(80 + (60 * i), 20, 55, 10)
-        }
-
     }
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (mouseX >= 80 + (60 * i) && mouseX <= 135 + (60 * i) && mouseY >= 20 && mouseY <= 74 && mouseIsPressed == true) {
-            canvasPressed(0, i);
-
-        }
-
-    }
-
-    //-------------------------------------------Row 2-----------------------------------------------------------------------------------
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (beats[1][i] == true) {
-
-            fill(green);
-
-            square(80 + (60 * i), 80, 55, 10)
-
-        }
-        else {
-            fill(grey);
-
-            square(80 + (60 * i), 80, 55, 10)
-        }
-
-    }
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (mouseX >= 80 + (60 * i) && mouseX <= 135 + (60 * i) && mouseY >= 80 && mouseY <= 120 && mouseIsPressed == true) {
-            canvasPressed(1, i);
-
-        }
-
-    }
-
-    //--------------------------------------------------Row 3-----------------------------------------------------------------------------------
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (beats[2][i] == true) {
-
-            fill(green);
-
-            square(80 + (60 * i), 140, 55, 10)
-
-        }
-        else {
-            fill(grey);
-
-            square(80 + (60 * i), 140, 55, 10)
-        }
-
-    }
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (mouseX >= 80 + (60 * i) && mouseX <= 135 + (60 * i) && mouseY >= 140 && mouseY <= 185 && mouseIsPressed == true) {
-            canvasPressed(2, i);
-
-        }
-
-    }
-
-    //-------------------------------------------Row 4-----------------------------------------------------------------------------------
-
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (beats[3][i] == true) {
-
-            fill(green);
-
-            square(80 + (60 * i), 200, 55, 10)
-
-        }
-        else {
-            fill(grey);
-
-            square(80 + (60 * i), 200, 55, 10)
-        }
-
-    }
-
-    for (let i = 0; i < beats[0].length; i++) {
-
-        if (mouseX >= 80 + (60 * i) && mouseX <= 135 + (60 * i) && mouseY >= 200 && mouseY <= 240 && mouseIsPressed == true) {
-            canvasPressed(3, i);
-
-        }
-
-    }
-
 }
 
-function canvasPressed(a, b) {
-
-    beats[a][b] = !beats[a][b]
+function mouseClicked() {
+    for(let row of rows) {
+        for(let cell of row) {
+            if(cell.isPointInMe(mouseX, mouseY)) {
+                cell.toggle();
+            }
+        }
+    }
 }
 
-function drawRow(row) {
-    const cells = row.cells;
+function windowResized(){
+    resizeCanvas(windowWidth, windowHeight);
+}
 
-    for(let i = 0; i < cells.length; i++) {
-        const cell = cells[i];
-        const x = row.xPos + (i * row.cellSize) + (i * row.cellSpacing);
-        
-        fill(cell.active ? "green" : "none");
-        square(x, row.yPos, row.cellSize);
+
+// Classes
+
+class Cell {
+    constructor(xPos, yPos, diam, active, sound) {
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.diam = diam;
+        this.active = active;
+        this.sound = sound;
+    }
+
+    radius() { 
+        return this.diam / 2;
+    }
+
+    isPointInMe(x, y) {
+        return dist(x, y, this.xPos, this.yPos) <= this.radius();
+    }
+
+    toggle() {
+        this.active = !this.active;
+    }
+
+    draw() {
+        fill(this.active ? green : grey);
+        circle(this.xPos, this.yPos, this.diam);
     }
 }
