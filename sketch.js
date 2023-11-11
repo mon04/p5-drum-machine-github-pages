@@ -149,3 +149,15 @@ function canvasPressed(a, b) {
 
     beats[a][b] = !beats[a][b]
 }
+
+function drawRow(row) {
+    const cells = row.cells;
+
+    for(let i = 0; i < cells.length; i++) {
+        const cell = cells[i];
+        const x = row.xPos + (i * row.cellSize) + (i * row.cellSpacing);
+        
+        fill(cell.active ? "green" : "none");
+        square(x, row.yPos, row.cellSize);
+    }
+}
