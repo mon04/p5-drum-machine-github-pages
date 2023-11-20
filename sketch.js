@@ -6,6 +6,20 @@ let mySound4;
 let grey;
 let green;
 
+const initialDrumCount = 4;
+const initialBarCount = 2;
+const beatsPerBar = 4;
+
+const maxDrumCount = 8;
+const minDrumCount = 1;
+const maxBarCount = 4;
+const minBarCount = 1;
+
+const maxGridWidth = 980;
+const marginY = 10;
+const marginX = 10;
+const cellGapSize = 5;
+
 let rows = [];
 
 function preload() {
@@ -17,6 +31,10 @@ function preload() {
 }
 
 function setup() {
+
+    rSlider = createSlider(0, 255, 100);
+    rSlider.position(20, 20);
+
     frameRate(60);
 
     grey = color(200, 200, 200);
@@ -24,49 +42,94 @@ function setup() {
     
     createCanvas(windowWidth, windowHeight);
     background(220, 220, 220);
-    stroke(128, 128, 128)
-
-    let drumCount = 4;
-    let barCount = 2;
-    let beatsPerBar = 4;
-
-    let cellSize = 50;
-    let cellGapH = 5;
-    let cellGapV = 5;
-
-    let controlsXPos = 10 + cellSize / 2;
-    let controlsYPos = 10 + cellSize / 2;
+    stroke(128, 128, 128);
 
     // Initialize grid
-    for(let i = 0; i < drumCount; i++) {
-        let cells = [];
-        for(let j = 0; j < barCount*beatsPerBar; j++) {
-            let cellY = controlsYPos + (i * cellSize) + (i * cellGapV);
-            let cellX = controlsXPos + (j * cellSize) + (j * cellGapH);
-            cells.push(new Cell(cellX, cellY, cellSize, false, mySound));
+    rows = Array(initialDrumCount)
+            .fill(null)
+            .map(()=>Array(initialBarCount*beatsPerBar).fill(false)); // 2D array of false values
+}
+
+function addRow() {
+    if(rows.length === maxDrumCount)
+        return;
+
+    rows.push(Array(rows[0].length).fill(false));
+}
+
+function removeRow() {
+    if(rows.length === minDrumCount)
+        return;
+
+    rows = rows.slice(0, rows.length - 1);
+}
+
+function addBar() {
+    if((rows[0].length + beatsPerBar) / beatsPerBar > maxBarCount)
+        return;
+
+    for(let i = 0; i < rows.length; i++) {
+        for(let j = 0; j < beatsPerBar; j++) {
+            rows[i].push(false);
         }
-        rows.push(cells);
     }
-    print(rows)
+}
+
+function removeBar() {
+    if((rows[0].length - beatsPerBar) / beatsPerBar < minBarCount)
+        return;
+
+    for(let i = 0; i < rows.length; i++) {
+        for(let j = 0; j < beatsPerBar; j++) {
+            rows[i].pop();
+        }
+    }
 }
 
 function draw() {
     background(220);
+    drawGrid();
+}
 
-    for(let i = 0; i < rows.length; i ++) {
+function drawGrid() {
+    const cellDiam = getCellDiam();
+    for(let i = 0; i < rows.length; i++) {
         for(let j = 0; j < rows[i].length; j++) {
-            rows[i][j].draw();
+            const x = getXPosOfCell(j);
+            const y = getYPosOfCell(i);
+            const active = rows[i][j];
+            cell(x, y, cellDiam, active);
         }
     }
 }
 
 function mouseClicked() {
-    for(let row of rows) {
-        for(let cell of row) {
-            if(cell.isPointInMe(mouseX, mouseY)) {
-                cell.toggle();
+    const mx = mouseX;
+    const my = mouseY;
+    const cellDiam = getCellDiam();
+    for(let i = 0; i < rows.length; i++) {
+        for(let j = 0; j < rows[i].length; j++) {
+            const cx = getXPosOfCell(j);
+            const cy = getYPosOfCell(i);
+            if(isPointInCell(mx, my, cx, cy, cellDiam)) {
+                rows[i][j] = !rows[i][j];
             }
         }
+    }
+}
+
+function keyReleased() {
+    if (keyCode === 38) { // UP_ARROW
+        removeRow();
+    }
+    else if (keyCode === 40) { // DOWN_ARROW
+        addRow();
+    }
+    else if (keyCode === 37) { // LEFT_ARROW
+        removeBar();
+    }
+    else if (keyCode === 39) { // RIGHT_ARROW
+        addBar();
     }
 }
 
@@ -74,32 +137,26 @@ function windowResized(){
     resizeCanvas(windowWidth, windowHeight);
 }
 
+function cell(x, y, diam, active) {
+    fill(active ? green : grey);
+    circle(x, y, diam);
+}
 
-// Classes
+function getXPosOfCell(cell_index) {
+    const cellDiam = getCellDiam();
+    return marginX + cellDiam / 2 + (cell_index * cellDiam) + (cell_index * cellGapSize);
+}
 
-class Cell {
-    constructor(xPos, yPos, diam, active, sound) {
-        this.xPos = xPos;
-        this.yPos = yPos;
-        this.diam = diam;
-        this.active = active;
-        this.sound = sound;
-    }
+function getYPosOfCell(row_index) {
+    const cellDiam = getCellDiam();
+    return marginY + cellDiam / 2 + (row_index * cellDiam) + (row_index * cellGapSize);
+}
 
-    radius() { 
-        return this.diam / 2;
-    }
+function getCellDiam() {
+    const gridWidth = min(windowWidth - marginX * 2, maxGridWidth);
+    return (gridWidth) / (rows[0].length + cellGapSize);
+}
 
-    isPointInMe(x, y) {
-        return dist(x, y, this.xPos, this.yPos) <= this.radius();
-    }
-
-    toggle() {
-        this.active = !this.active;
-    }
-
-    draw() {
-        fill(this.active ? green : grey);
-        circle(this.xPos, this.yPos, this.diam);
-    }
+function isPointInCell(px, py, cx, cy, cellDiam) {
+    return dist(px, py, cx, cy) <= cellDiam / 2;
 }
