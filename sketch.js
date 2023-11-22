@@ -6,10 +6,25 @@ let mySound4;
 let grey;
 let green;
 
+let i=0;
+let Start=false;
+let Dsequence;
+let buttontext=document.getElementById("playstop");
+let BPM=document.getElementById("BPM");
+let BPMInt;
+BPM.textContent=""+document.getElementById("myRange").value;
+BPMInt = (BPM.textContent*1);
+let numOfBeats=7;
+let SecondsPerMinute = 60;
+
+
+
 const initialDrumCount = 4;
 const initialBarCount = 2;
 const beatsPerBar = 4;
-
+let currentBarCount=2;
+let currentRowCount=4;
+let waitTime = ((SecondsPerMinute/BPMInt)*1000)/4;
 const maxDrumCount = 8;
 const minDrumCount = 1;
 const maxBarCount = 4;
@@ -22,18 +37,144 @@ const cellGapSize = 5;
 
 let rows = [];
 
+function every5seconds()
+{
+  if(i>numOfBeats){
+    i=0;
+  }
+  else{
+
+  }
+  
+
+  if(rows[0][i]==true){
+    //mySound.pause();
+    mySound.play();
+   
+  }
+
+  //Mon I am sorry it is nested if statements but if the program tries too check rows[1][i] and its been removed, the program shits itself.
+  //it is a fail safe
+  if(currentRowCount>=2)
+  {
+    if(rows[1][i]==true)
+    {
+        //mySound2.pause();
+        mySound2.play();
+        
+
+        console.log("Hat");
+    }
+  }
+  if(currentRowCount>=3)
+  {
+    if(rows[2][i]==true ){
+        //mySound3.pause();
+        mySound3.play();
+        
+        console.log("Clap");
+      }
+  }
+  
+  if(currentRowCount>=4){
+
+    if(rows[3][i]==true){
+        //mySound4.pause();
+        mySound4.play();
+        
+        console.log("ClosedHat");
+      }
+  }
+
+  if(currentRowCount>=5)
+  {
+    if(rows[4][i]==true)
+    {
+        //mySound2.pause();
+        mySound5.play();
+        
+
+       
+    }
+  }
+  if(currentRowCount>=6)
+  {
+    if(rows[5][i]==true ){
+        //mySound3.pause();
+        mySound6.play();
+        
+        console.log("Clap");
+      }
+  }
+  
+  if(currentRowCount>=7){
+
+    if(rows[6][i]==true){
+        //mySound4.pause();
+        mySound7.play();
+        
+        console.log("ClosedHat");
+      }
+  }
+
+  if(currentRowCount>=8){
+
+    if(rows[7][i]==true){
+        //mySound4.pause();
+        mySound8.play();
+        
+        console.log("ClosedHat");
+      }
+  }
+  
+  i++;
+} 
+
+function BPMchange(){
+    BPM.textContent=""+document.getElementById("myRange").value;
+    BPMInt = (BPM.textContent*1);
+    BPM.textContent=""+document.getElementById("myRange").value;
+    console.log(BPMInt);
+    waitTime = ((SecondsPerMinute/BPMInt)*1000)/4
+  
+    if(Start==true){
+      clearInterval(Dsequence);
+      Dsequence=setInterval(every5seconds, waitTime);
+    }
+    
+  }
+
+function StartStop()
+{
+  Start=!Start;
+  console.log(Start);
+  if(Start==true){
+    Dsequence=setInterval(every5seconds, waitTime);
+    buttontext.textContent="Stop";
+  } 
+  if(Start==false)
+  {
+    clearInterval(Dsequence);
+    buttontext.textContent="Play";
+  }    
+  
+  
+}
+
 function preload() {
     soundFormats('wav', 'ogg');
     mySound = loadSound('Sounds/909-kick_D_minor');
     mySound2 = loadSound('Sounds/909-open-hi-hat');
     mySound3 = loadSound('Sounds/straight-909-clap_A_major');
     mySound4 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
+    //PlaceHolder Sounds for 5, 6 7 and 8
+    mySound5 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
+    mySound6 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
+    mySound7 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
+    mySound8 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
 }
 
 function setup() {
-
-    rSlider = createSlider(0, 255, 100);
-    rSlider.position(20, 20);
 
     frameRate(60);
 
@@ -55,6 +196,7 @@ function addRow() {
         return;
 
     rows.push(Array(rows[0].length).fill(false));
+    currentRowCount=currentRowCount+1;
 }
 
 function removeRow() {
@@ -62,6 +204,7 @@ function removeRow() {
         return;
 
     rows = rows.slice(0, rows.length - 1);
+    currentRowCount=currentRowCount-1;
 }
 
 function addBar() {
@@ -73,6 +216,7 @@ function addBar() {
             rows[i].push(false);
         }
     }
+    numOfBeats=numOfBeats+4;
 }
 
 function removeBar() {
@@ -84,6 +228,7 @@ function removeBar() {
             rows[i].pop();
         }
     }
+    numOfBeats=numOfBeats-4;
 }
 
 function draw() {
@@ -159,4 +304,8 @@ function getCellDiam() {
 
 function isPointInCell(px, py, cx, cy, cellDiam) {
     return dist(px, py, cx, cy) <= cellDiam / 2;
+}
+
+function getCurrentBarCount() {
+    return rows.length/beatsPerBar;
 }
