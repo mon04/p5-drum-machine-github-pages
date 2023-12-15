@@ -157,12 +157,13 @@ function BPMchange(){
     BPMInt = (BPM.textContent*1);
     BPM.textContent=""+document.getElementById("myRange").value;
     
-    waitTime = ((SecondsPerMinute/BPMInt)*1000)
+    waitTime = ((SecondsPerMinute/BPMInt)*1000)/4
     
   
     if(Start==true){
-      clearInterval(Dsequence);
-      Dsequence=setInterval(every5seconds, waitTime);
+    //   clearInterval(Dsequence);
+    //   Dsequence=setInterval(every5seconds, waitTime);
+        
       
     }
     
