@@ -12,13 +12,14 @@ let Dsequence;
 let buttontext=document.getElementById("playstop");
 let BPM=document.getElementById("BPM");
 let BPMInt;
+let SwingInt;
 BPM.textContent=""+document.getElementById("myRange").value;
+let Swing=document.getElementById("Swing");
+Swing.textContent=""+document.getElementById("mySwing").value;
+SwingInt = (Swing.textContent*1);
 BPMInt = (BPM.textContent*1);
 let numOfBeats=7;
 let SecondsPerMinute = 60;
-
-
-
 const initialDrumCount = 4;
 const initialBarCount = 2;
 const beatsPerBar = 4;
@@ -29,135 +30,176 @@ const maxDrumCount = 8;
 const minDrumCount = 1;
 const maxBarCount = 4;
 const minBarCount = 1;
-
 const maxGridWidth = 980;
 const marginY = 10;
 const marginX = 10;
 const cellGapSize = 5;
-
+let k=1;
 let rows = [];
 
-function every5seconds()
-{
-  if(i>numOfBeats){
-    i=0;
-  }
-  else{
 
-  }
-  
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
-  if(rows[0][i]==true){
-    //mySound.pause();
-    mySound.play();
-   
-  }
 
-  //Mon I am sorry it is nested if statements but if the program tries too check rows[1][i] and its been removed, the program shits itself.
-  //it is a fail safe
-  if(currentRowCount>=2)
-  {
-    if(rows[1][i]==true)
-    {
-        //mySound2.pause();
-        mySound2.play();
+const Sequencer = async () => {
+    
+        
+        while(Start==true){
+            
+            for(i=0; i<numOfBeats+1; i++){
+                PlaySounds(i);
+                if(k%2==1){
+                    await sleep(waitTime+SwingInt); 
+                }
+                else{
+                    await sleep(waitTime-SwingInt);
+                }
+                k++;
+                  
+            }
+        }
+        
         
 
-        console.log("Hat");
-    }
-  }
-  if(currentRowCount>=3)
-  {
-    if(rows[2][i]==true ){
-        //mySound3.pause();
-        mySound3.play();
-        
-        console.log("Clap");
-      }
-  }
-  
-  if(currentRowCount>=4){
-
-    if(rows[3][i]==true){
-        //mySound4.pause();
-        mySound4.play();
-        
-        console.log("ClosedHat");
-      }
   }
 
-  if(currentRowCount>=5)
-  {
-    if(rows[4][i]==true)
-    {
-        //mySound2.pause();
-        mySound5.play();
-        
 
+
+
+
+function PlaySounds(i){
+    if(rows[0][i]==true){
+        //mySound.pause();
+        mySound.play();
        
-    }
-  }
-  if(currentRowCount>=6)
-  {
-    if(rows[5][i]==true ){
-        //mySound3.pause();
-        mySound6.play();
-        
-        console.log("Clap");
       }
-  }
-  
-  if(currentRowCount>=7){
-
-    if(rows[6][i]==true){
-        //mySound4.pause();
-        mySound7.play();
-        
-        console.log("ClosedHat");
+    
+      //Mon I am sorry it is nested if statements but if the program tries too check rows[1][i] and its been removed, the program shits itself.
+      //it is a fail safe
+      if(currentRowCount>=2)
+      {
+        if(rows[1][i]==true)
+        {
+            //mySound2.pause();
+            mySound2.play();
+            
+    
+            console.log("Hat");
+        }
       }
-  }
-
-  if(currentRowCount>=8){
-
-    if(rows[7][i]==true){
-        //mySound4.pause();
-        mySound8.play();
-        
-        console.log("ClosedHat");
+      if(currentRowCount>=3)
+      {
+        if(rows[2][i]==true ){
+            //mySound3.pause();
+            mySound3.play();
+            
+            console.log("Clap");
+            
+          }
       }
-  }
-  
-  i++;
-} 
+      
+      if(currentRowCount>=4){
+    
+        if(rows[3][i]==true){
+            //mySound4.pause();
+            mySound4.play();
+            
+            console.log("ClosedHat");
+          }
+      }
+    
+      if(currentRowCount>=5)
+      {
+        if(rows[4][i]==true)
+        {
+            //mySound2.pause();
+            mySound5.play();
+            
+    
+           
+        }
+      }
+      if(currentRowCount>=6)
+      {
+        if(rows[5][i]==true ){
+            //mySound3.pause();
+            mySound6.play();
+            
+            console.log("Clap");
+          }
+      }
+      
+      if(currentRowCount>=7){
+    
+        if(rows[6][i]==true){
+            //mySound4.pause();
+            mySound7.play();
+            
+            console.log("ClosedHat");
+          }
+      }
+    
+      if(currentRowCount>=8){
+    
+        if(rows[7][i]==true){
+            //mySound4.pause();
+            mySound8.play();
+            
+            console.log("ClosedHat");
+          }
+      }
+
+}
+
 
 function BPMchange(){
     BPM.textContent=""+document.getElementById("myRange").value;
     BPMInt = (BPM.textContent*1);
     BPM.textContent=""+document.getElementById("myRange").value;
-    console.log(BPMInt);
-    waitTime = ((SecondsPerMinute/BPMInt)*1000)/4
+    
+    waitTime = ((SecondsPerMinute/BPMInt)*1000)
+    
   
     if(Start==true){
       clearInterval(Dsequence);
       Dsequence=setInterval(every5seconds, waitTime);
+      
     }
     
+    
   }
+
+  function Swingchange(){
+    Swing.textContent=""+document.getElementById("mySwing").value;
+    SwingInt = (Swing.textContent*1);
+    Swing.textContent=""+document.getElementById("mySwing").value;
+    console.log(SwingInt);
+    SwingInt = (((100-SwingInt)*waitTime)/100);
+    console.log("WaitTime="+waitTime)
+    console.log("SwingInt="+SwingInt)
+    SwingInt = (waitTime-SwingInt);
+    console.log("Final:"+ SwingInt);
+    
+  }
+  
+    
+
 
 function StartStop()
 {
   Start=!Start;
-  console.log(Start);
   if(Start==true){
-    Dsequence=setInterval(every5seconds, waitTime);
+    Sequencer(); 
     buttontext.textContent="Stop";
   } 
   if(Start==false)
   {
-    clearInterval(Dsequence);
+    
     buttontext.textContent="Play";
-  }    
-  
+  }
+    
+    
+    
   
 }
 
