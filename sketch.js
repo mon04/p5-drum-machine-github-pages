@@ -4,28 +4,30 @@ let mySound3;
 let mySound4;
 
 let grey;
+let darkGrey;
 let green;
 
-let i=0;
-let Start=false;
+let pauseDrawing = false;
+let i = 0;
+let Start = false;
 let Dsequence;
-let buttontext=document.getElementById("playstop");
-let BPM=document.getElementById("BPM");
+let buttontext = document.getElementById("playstop");
+let BPM = document.getElementById("BPM");
 let BPMInt;
 let SwingInt;
-BPM.textContent=""+document.getElementById("myRange").value;
-let Swing=document.getElementById("Swing");
-Swing.textContent=""+document.getElementById("mySwing").value;
-SwingInt = (Swing.textContent*1);
-BPMInt = (BPM.textContent*1);
-let numOfBeats=7;
+BPM.textContent = "" + document.getElementById("myRange").value;
+let Swing = document.getElementById("Swing");
+Swing.textContent = "" + document.getElementById("mySwing").value;
+SwingInt = (Swing.textContent * 1);
+BPMInt = (BPM.textContent * 1);
+let numOfBeats = 8;
+let currentBeat = 0;
 let SecondsPerMinute = 60;
 const initialDrumCount = 4;
 const initialBarCount = 2;
 const beatsPerBar = 4;
-let currentBarCount=2;
-let currentRowCount=4;
-let waitTime = ((SecondsPerMinute/BPMInt)*1000)/4;
+let currentRowCount = 4;
+let waitTime = ((SecondsPerMinute / BPMInt) * 1000) / 4;
 const maxDrumCount = 8;
 const minDrumCount = 1;
 const maxBarCount = 4;
@@ -34,255 +36,186 @@ const maxGridWidth = 980;
 const marginY = 10;
 const marginX = 10;
 const cellGapSize = 5;
-let k=1;
+let k = 1;
 let rows = [];
-
+let sounds = [];
+const DEFAULT_SOUND_FILES = [
+    'Sounds/909-kick_D_minor',
+    'Sounds/909-open-hi-hat',
+    'Sounds/straight-909-clap_A_major',
+    'Sounds/909-drum-kit-closed-hi-hat',
+]
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
-
 const Sequencer = async () => {
-    
-        
-        while(Start==true){
-            
-            for(i=0; i<numOfBeats+1; i++){
-                PlaySounds(i);
-                if(k%2==1){
-                    await sleep(waitTime+SwingInt); 
-                }
-                else{
-                    await sleep(waitTime-SwingInt);
-                }
-                k++;
-                  
+    while (Start == true) {
+        for (i = 0; i < numOfBeats; i++) {
+            currentBeat = i;
+            PlaySounds(i);
+            if (k % 2 == 1) {
+                await sleep(waitTime + SwingInt);
             }
+            else {
+                await sleep(waitTime - SwingInt);
+            }
+            k++;
         }
-        
-        
-
-  }
-
-
-
-
-
-function PlaySounds(i){
-    if(rows[0][i]==true){
-        //mySound.pause();
-        mySound.play();
-       
-      }
-    
-      //Mon I am sorry it is nested if statements but if the program tries too check rows[1][i] and its been removed, the program shits itself.
-      //it is a fail safe
-      if(currentRowCount>=2)
-      {
-        if(rows[1][i]==true)
-        {
-            //mySound2.pause();
-            mySound2.play();
-            
-    
-            console.log("Hat");
-        }
-      }
-      if(currentRowCount>=3)
-      {
-        if(rows[2][i]==true ){
-            //mySound3.pause();
-            mySound3.play();
-            
-            console.log("Clap");
-            
-          }
-      }
-      
-      if(currentRowCount>=4){
-    
-        if(rows[3][i]==true){
-            //mySound4.pause();
-            mySound4.play();
-            
-            console.log("ClosedHat");
-          }
-      }
-    
-      if(currentRowCount>=5)
-      {
-        if(rows[4][i]==true)
-        {
-            //mySound2.pause();
-            mySound5.play();
-            
-    
-           
-        }
-      }
-      if(currentRowCount>=6)
-      {
-        if(rows[5][i]==true ){
-            //mySound3.pause();
-            mySound6.play();
-            
-            console.log("Clap");
-          }
-      }
-      
-      if(currentRowCount>=7){
-    
-        if(rows[6][i]==true){
-            //mySound4.pause();
-            mySound7.play();
-            
-            console.log("ClosedHat");
-          }
-      }
-    
-      if(currentRowCount>=8){
-    
-        if(rows[7][i]==true){
-            //mySound4.pause();
-            mySound8.play();
-            
-            console.log("ClosedHat");
-          }
-      }
-
+    }
 }
 
-
-function BPMchange(){
-    BPM.textContent=""+document.getElementById("myRange").value;
-    BPMInt = (BPM.textContent*1);
-    BPM.textContent=""+document.getElementById("myRange").value;
-    
-    waitTime = ((SecondsPerMinute/BPMInt)*1000)/4
-    
-  
-    if(Start==true){
-    //   clearInterval(Dsequence);
-    //   Dsequence=setInterval(every5seconds, waitTime);
-        
-      
+function PlaySounds(beat) {
+    for(let row = 0; row < currentRowCount; row++) {
+        if (rows[row][beat]) {
+            sounds[row].play();
+        }
     }
-    
-    
-  }
+}
 
-  function Swingchange(){
-    Swing.textContent=""+document.getElementById("mySwing").value;
-    SwingInt = (Swing.textContent*1);
-    Swing.textContent=""+document.getElementById("mySwing").value;
+function BPMchange() {
+    BPM.textContent = "" + document.getElementById("myRange").value;
+    BPMInt = (BPM.textContent * 1);
+    BPM.textContent = "" + document.getElementById("myRange").value;
+
+    waitTime = ((SecondsPerMinute / BPMInt) * 1000) / 4
+    if (Start == true) {
+        //   clearInterval(Dsequence);
+        //   Dsequence=setInterval(every5seconds, waitTime);
+    }
+}
+
+function Swingchange() {
+    Swing.textContent = "" + document.getElementById("mySwing").value;
+    SwingInt = (Swing.textContent * 1);
+    Swing.textContent = "" + document.getElementById("mySwing").value;
     console.log(SwingInt);
-    SwingInt = (((100-SwingInt)*waitTime)/100);
-    console.log("WaitTime="+waitTime)
-    console.log("SwingInt="+SwingInt)
-    SwingInt = (waitTime-SwingInt);
-    console.log("Final:"+ SwingInt);
-    
-  }
-  
-    
+    SwingInt = (((100 - SwingInt) * waitTime) / 100);
+    console.log("WaitTime=" + waitTime)
+    console.log("SwingInt=" + SwingInt)
+    SwingInt = (waitTime - SwingInt);
+    console.log("Final:" + SwingInt);
+}
 
+function stopPlaying() {
+    Start = false;
+    buttontext.textContent = "Play";
+    buttontext.style.borderColor='lime';
+}
 
-function StartStop()
-{
-  Start=!Start;
-  if(Start==true){
-    Sequencer(); 
-    buttontext.textContent="Stop";
-  } 
-  if(Start==false)
-  {
-    
-    buttontext.textContent="Play";
-  }
-    
-    
-    
-  
+function startPlaying() {
+    Sequencer();
+    buttontext.textContent = "Stop";
+    buttontext.style.borderColor='red';
+}
+
+function StartStop() {
+    Start = !Start;
+    if (Start == true) {
+        startPlaying();
+    }
+    if (Start == false) {
+        stopPlaying();
+    }
 }
 
 function preload() {
     soundFormats('wav', 'ogg');
-    mySound = loadSound('Sounds/909-kick_D_minor');
-    mySound2 = loadSound('Sounds/909-open-hi-hat');
-    mySound3 = loadSound('Sounds/straight-909-clap_A_major');
-    mySound4 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
-    //PlaceHolder Sounds for 5, 6 7 and 8
-    mySound5 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
-    mySound6 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
-    mySound7 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
-    mySound8 = loadSound('Sounds/909-drum-kit-closed-hi-hat');
+    sounds = [];
+    for(let i = 0; i < currentRowCount; i++) {
+        let s = loadSound(DEFAULT_SOUND_FILES[i] || DEFAULT_SOUND_FILES[0])
+        sounds.push(s)
+    }
 }
 
 function setup() {
+    createCanvas(windowWidth, windowHeight);
 
     frameRate(60);
 
     grey = color(200, 200, 200);
     green = color(0, 255, 0);
+    darkGrey = color(180, 180, 180);
+
     
-    createCanvas(windowWidth, windowHeight);
     background(220, 220, 220);
     stroke(128, 128, 128);
+    rectMode(CORNERS)
 
     // Initialize grid
     rows = Array(initialDrumCount)
-            .fill(null)
-            .map(()=>Array(initialBarCount*beatsPerBar).fill(false)); // 2D array of false values
+        .fill(null)
+        .map(() => Array(initialBarCount * beatsPerBar).fill(false)); // 2D array of false values
 }
 
 function addRow() {
-    if(rows.length === maxDrumCount)
+    if (rows.length === maxDrumCount)
         return;
 
+    //stopPlaying()
     rows.push(Array(rows[0].length).fill(false));
-    currentRowCount=currentRowCount+1;
+    let s = loadDefaultSound(rows.length - 1)
+    sounds.push(s)
+    currentRowCount = currentRowCount + 1;
 }
 
 function removeRow() {
-    if(rows.length === minDrumCount)
+    Start = false;
+    if (rows.length === minDrumCount)
         return;
 
+    //stopPlaying()
     rows = rows.slice(0, rows.length - 1);
-    currentRowCount=currentRowCount-1;
+    sounds = sounds.slice(0, sounds.length - 1);
+    currentRowCount = currentRowCount - 1;
 }
 
 function addBar() {
-    if((rows[0].length + beatsPerBar) / beatsPerBar > maxBarCount)
+    if ((rows[0].length + beatsPerBar) / beatsPerBar > maxBarCount)
         return;
 
-    for(let i = 0; i < rows.length; i++) {
-        for(let j = 0; j < beatsPerBar; j++) {
+    //stopPlaying()
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < beatsPerBar; j++) {
             rows[i].push(false);
         }
     }
-    numOfBeats=numOfBeats+4;
+    numOfBeats = numOfBeats + 4;
 }
 
 function removeBar() {
-    if((rows[0].length - beatsPerBar) / beatsPerBar < minBarCount)
+    if ((rows[0].length - beatsPerBar) / beatsPerBar < minBarCount)
         return;
 
-    for(let i = 0; i < rows.length; i++) {
-        for(let j = 0; j < beatsPerBar; j++) {
+    //stopPlaying()
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < beatsPerBar; j++) {
             rows[i].pop();
         }
     }
-    numOfBeats=numOfBeats-4;
+    numOfBeats = numOfBeats - 4;
 }
 
 function draw() {
-    background(220);
-    drawGrid();
+    if (!pauseDrawing) {
+        background(220);
+        drawGrid();
+    }
 }
 
 function drawGrid() {
     const cellDiam = getCellDiam();
-    for(let i = 0; i < rows.length; i++) {
-        for(let j = 0; j < rows[i].length; j++) {
+
+    const x1 = marginX + (cellDiam * currentBeat) + (cellGapSize * currentBeat)
+    const x2 = x1 + cellDiam + cellGapSize;
+
+    const y1 = marginY
+    const y2 = y1 + (cellDiam * currentRowCount) + (cellGapSize * currentRowCount);
+
+    fill(darkGrey)
+    rect(x1, y1, x2, y2, cellDiam/2)
+
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
             const x = getXPosOfCell(j);
             const y = getYPosOfCell(i);
             const active = rows[i][j];
@@ -295,33 +228,18 @@ function mouseClicked() {
     const mx = mouseX;
     const my = mouseY;
     const cellDiam = getCellDiam();
-    for(let i = 0; i < rows.length; i++) {
-        for(let j = 0; j < rows[i].length; j++) {
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
             const cx = getXPosOfCell(j);
             const cy = getYPosOfCell(i);
-            if(isPointInCell(mx, my, cx, cy, cellDiam)) {
+            if (isPointInCell(mx, my, cx, cy, cellDiam)) {
                 rows[i][j] = !rows[i][j];
             }
         }
     }
 }
 
-function keyReleased() {
-    if (keyCode === 38) { // UP_ARROW
-        removeRow();
-    }
-    else if (keyCode === 40) { // DOWN_ARROW
-        addRow();
-    }
-    else if (keyCode === 37) { // LEFT_ARROW
-        removeBar();
-    }
-    else if (keyCode === 39) { // RIGHT_ARROW
-        addBar();
-    }
-}
-
-function windowResized(){
+function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
@@ -332,12 +250,12 @@ function cell(x, y, diam, active) {
 
 function getXPosOfCell(cell_index) {
     const cellDiam = getCellDiam();
-    return marginX + cellDiam / 2 + (cell_index * cellDiam) + (cell_index * cellGapSize);
+    return marginX + cellGapSize / 2 + cellDiam / 2 + (cell_index * cellDiam) + (cell_index * cellGapSize);
 }
 
 function getYPosOfCell(row_index) {
     const cellDiam = getCellDiam();
-    return marginY + cellDiam / 2 + (row_index * cellDiam) + (row_index * cellGapSize);
+    return marginY + cellGapSize / 2 + cellDiam / 2 + (row_index * cellDiam) + (row_index * cellGapSize);
 }
 
 function getCellDiam() {
@@ -350,5 +268,127 @@ function isPointInCell(px, py, cx, cy, cellDiam) {
 }
 
 function getCurrentBarCount() {
-    return rows.length/beatsPerBar;
+    return rows.length / beatsPerBar;
+}
+
+function loadDefaultSound(rowIndex) {
+    let s = loadSound(DEFAULT_SOUND_FILES[rowIndex] || DEFAULT_SOUND_FILES[0])
+    return s
+}
+
+function saveFile() {
+    let content = getExportFileContent()
+    let filename = document.getElementById("filename").value || "my_sequence.txt";
+    saveStrings(content, filename, "txt")
+}
+
+function getExportFileContent() {
+    let lines = []
+    for(let i = 0; i < rows.length; i++) {
+        let line = ""
+        for (val of rows[i]) {
+            line += val == true ? '1' : '0'
+        }
+        lines.push(line)
+    }
+    return lines;
+}
+
+function showErrorText() {
+    let e = document.getElementById('error-text')
+    e.style.display = "block"
+}
+
+function hideErrorText() {
+    let e = document.getElementById('error-text')
+    e.style.display = "none"
+}
+
+function setErrorText(text) {
+    let e = document.getElementById('error-text-value')
+    e.innerHTML = text;
+}
+
+async function importFile() {
+    pauseDrawing = true
+
+    let f = document.getElementById('import').files[0]
+    let text = await f.text();
+
+    lines = text.trim().split('\n');
+    let validation = validateFileText(lines);
+
+    if (validation !== true) {
+        setErrorText("Failed to import file: " + validation[1])
+        showErrorText();
+        pauseDrawing = false;
+        return;
+    }
+
+    newstate = []
+
+    for (let i = 0; i < lines.length && i < maxDrumCount; i++) {
+        newstate.push([])
+        for (let j = 0; j < lines[i].length && j < maxBarCount * beatsPerBar; j++) {
+            newstate[i].push(lines[i][j] === '1')
+        }
+    }
+
+    setGridState(newstate);
+
+    pauseDrawing = false;
+}
+
+function validateFileText(lines) {
+    try {
+        if (lines.length === 0)
+            return [false, "File must have one or more lines"];
+
+        if (lines[0].length === 0)
+            return [false, "File must have one or more beats"];
+
+        for (let ln of lines) {
+            for (let c of ln) {
+                if (c !== '0' && c !== '1')
+                    return [false, "File must only contain 1's and 0's"]
+            }
+        }
+
+        for (let ln of lines) {
+            if (ln.length !== lines[0].length)
+            return [false, "All lines must have equal length"];
+    }
+    
+    if (lines[0].length % beatsPerBar !== 0)
+        return [false, `Number of beats must be divisible by ${beatsPerBar}`]
+
+    } catch (error) {
+        return [false, "Unknown error"]
+    }
+
+    return true
+}
+
+function clearGrid() {
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            rows[i][j] = false;
+        }
+    }
+}
+
+function setGridState(vals) {
+    pauseDrawing = true;
+
+    rows = vals;
+    currentRowCount = rows.length;
+    numOfBeats = vals[0].length;
+
+    sounds = [];
+    for(let i = 0; i < currentRowCount; i++) {
+        let s = loadSound(DEFAULT_SOUND_FILES[i] || DEFAULT_SOUND_FILES[0])
+        sounds.push(s)
+    }
+
+    pauseDrawing = false;
 }

@@ -1,26 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sketch</title>
+    <title>p5.js Drum Sequencer</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.js"></script>
     <script src="librariesOld/p5.min.js"></script>
     <script src="librariesOld/p5.sound.min.js"></script>
-  </head>
+</head>
 
-  <body>
+<body>
     <div id="sideways">
-      <button id="playstop" onClick="StartStop()">Play</button>
-      <input onchange="BPMchange()" type="range" min="20" max="240" value="120" class="slider" id="myRange">
-      <p id="BPM">120</p>
-      <p > BPM</p>
-      <p>-------------- </p>
-      <input onchange="Swingchange()"  type="range" min="0" max="100" value="0" class="slider" id="mySwing">
-      <p id="Swing">0</p>
-      <p > % Swing</p>
-      </div>
-    <script src="sketch.js"></script>
-  </body>
+        <button id="playstop" class="playstop-button button-big" onClick="StartStop()">Play</button>
+        <div class="spacer"></div>
+        <table>
+            <tr>
+                <td>BPM: <span id="BPM">120</span></td>
+            </tr>
+            <tr>
+                <td>
+                    <input onchange="BPMchange()" type="range" min="20" max="240" value="120" class="slider" id="myRange">
+                </td>
+            </tr>
+        </table>
+        <div class="spacer"></div>
+        <table>
+            <tr>
+                <td>Swing: <span id="Swing">0</span>%</td>
+            </tr>
+            <tr>
+                <td>
+                    <input onchange="Swingchange()" type="range" min="0" max="100" value="0" class="slider" id="mySwing">
+                </td>
+            </tr>
+        </table>
+        <div class="spacer"></div>
+        <table>
+            <tr>
+                <td>
+                    <button onclick="addRow()" class="button-small">+ Drums</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button onclick="removeRow()" class="button-small">- Drums</button>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <button onclick="addBar()" class="button-small">+ Bars</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button onclick="removeBar()" class="button-small">- Bars</button>
+                </td>
+            </tr>
+        </table>
+        <div class="mini-spacer"></div>
+        <button id="clear" class="button-big" onClick="clearGrid()">Clear</button>
+        <div class="spacer"></div>
+        <table>
+            <tr>
+                <td>
+                    <input onchange="importFile()" type="file" id="import" accept=".txt, .csv">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input onclick="saveFile()" type="button" value="Save as...">
+                    <input id="filename" type="text" placeholder="my_sequence.txt">
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="error-text">
+        <span id="error-text-value"></span>
+        <button id="error-clear-button" onClick="hideErrorText()">clear</button>
+    </div>
+    <script src="./sketch.js"></script>
+</body>
+
 </html>
