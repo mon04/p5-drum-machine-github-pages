@@ -44,6 +44,21 @@ const DEFAULT_SOUND_FILES = [
     'Sounds/909-open-hi-hat',
     'Sounds/straight-909-clap_A_major',
     'Sounds/909-drum-kit-closed-hi-hat',
+    'Sounds/909-snare_G_major',
+    'Sounds/909-tom_E_major',
+    'Sounds/high-shaker-drum-shot',
+    'Sounds/crash-cymbal-drum-sound-f-sharp-key-06-1jU',
+]
+const soundNames=[
+    'Kick',
+    'Open Hat',
+    'Clap',
+    'Closed Hat',
+    'Snare',
+    'Toms',
+    'Shaker',
+    'Cymbal',
+
 ]
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
@@ -131,7 +146,9 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
 
     frameRate(60);
-
+     
+    
+    
     grey = color(200, 200, 200);
     green = color(0, 255, 0);
     darkGrey = color(180, 180, 180);
@@ -145,6 +162,8 @@ function setup() {
     rows = Array(initialDrumCount)
         .fill(null)
         .map(() => Array(initialBarCount * beatsPerBar).fill(false)); // 2D array of false values
+
+       
 }
 
 function addRow() {
@@ -159,7 +178,6 @@ function addRow() {
 }
 
 function removeRow() {
-    Start = false;
     if (rows.length === minDrumCount)
         return;
 
@@ -167,6 +185,7 @@ function removeRow() {
     rows = rows.slice(0, rows.length - 1);
     sounds = sounds.slice(0, sounds.length - 1);
     currentRowCount = currentRowCount - 1;
+    
 }
 
 function addBar() {
@@ -200,7 +219,45 @@ function draw() {
         background(220);
         drawGrid();
     }
-}
+    if(numOfBeats==4){
+        for(let i=0; i<rows.length; i++){
+            fill(0);
+            textSize(22);
+            text(soundNames[i], 471, i*120+55);
+            
+        }
+        
+    }
+    if(numOfBeats==8){
+        for(let i=0; i<rows.length; i++){
+            fill(0);
+            textSize(22);
+            text(soundNames[i], 671, i*80+55);
+            
+        }
+        
+    }
+    if(numOfBeats==12){
+        for(let i=0; i<rows.length; i++){
+            fill(0);
+            textSize(12);
+            text(soundNames[i], 771, i*65+40);
+            
+        }
+        
+    }
+    if(numOfBeats==16){
+        for(let i=0; i<rows.length; i++){
+            fill(0);
+            textSize(12);
+            text(soundNames[i], 851, i*50+45);
+            
+        }
+        
+    }
+    
+    }
+    
 
 function drawGrid() {
     const cellDiam = getCellDiam();
@@ -222,6 +279,8 @@ function drawGrid() {
             cell(x, y, cellDiam, active);
         }
     }
+    
+    
 }
 
 function mouseClicked() {
