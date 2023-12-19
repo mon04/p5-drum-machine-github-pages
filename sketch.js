@@ -374,7 +374,7 @@ async function importFile() {
     let f = document.getElementById('import').files[0]
     let text = await f.text();
 
-    lines = text.trim().split('\r\n');
+    lines = text.trim().split('\n');
     console.log(lines)
     let validation = validateFileText(lines);
 
@@ -401,6 +401,10 @@ async function importFile() {
 
 function validateFileText(lines) {
     try {
+        for (let i = 0; i < lines.length; i++) {
+            lines[i] = lines[i].trim()
+        }
+
         if (lines.length === 0) {
             return [false, "File must have one or more lines"];
         }
@@ -410,6 +414,7 @@ function validateFileText(lines) {
         }
         
         for (let ln of lines) {
+            console.log("line", ln)
             if (ln.length !== lines[0].length) {
                 return [false, "All lines must have equal length"];
             }
