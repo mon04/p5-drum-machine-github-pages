@@ -374,7 +374,8 @@ async function importFile() {
     let f = document.getElementById('import').files[0]
     let text = await f.text();
 
-    lines = text.trim().split('\n');
+    lines = text.trim().split('\r\n');
+    console.log(lines)
     let validation = validateFileText(lines);
 
     if (validation !== true) {
@@ -400,27 +401,31 @@ async function importFile() {
 
 function validateFileText(lines) {
     try {
-        if (lines.length === 0)
+        if (lines.length === 0) {
             return [false, "File must have one or more lines"];
+        }
 
-        if (lines[0].length === 0)
+        if (lines[0].length === 0) {
             return [false, "File must have one or more beats"];
-
+        }
+        
         for (let ln of lines) {
-            for (let c of ln) {
-                if (c !== '0' && c !== '1')
-                    return [false, "File must only contain 1's and 0's"]
+            if (ln.length !== lines[0].length) {
+                return [false, "All lines must have equal length"];
             }
         }
 
         for (let ln of lines) {
-            if (ln.length !== lines[0].length)
-            return [false, "All lines must have equal length"];
-    }
-    
-    if (lines[0].length % beatsPerBar !== 0)
-        return [false, `Number of beats must be divisible by ${beatsPerBar}`]
+            for (let c of ln) {
+                if (c !== '0' && c !== '1') {
+                    return [false, "File must only contain 1's and 0's"]
+                }
+            }
+        }
 
+        if (lines[0].length % beatsPerBar !== 0) {
+            return [false, `Number of beats must be divisible by ${beatsPerBar}`]
+        }
     } catch (error) {
         return [false, "Unknown error"]
     }
