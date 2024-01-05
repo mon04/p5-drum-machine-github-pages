@@ -329,7 +329,7 @@ function handleWindowResize() {
 }
 
 /*
-    Draw a single cell for the grid
+    Draw a single cell for the grid 
 */
 function drawCell(x, y, diam, active) {
     fill(active ? green : grey);
