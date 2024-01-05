@@ -282,7 +282,7 @@ function draw() {
     let labelx = (cellDiam * numOfBeats) + (cellGapSize * (numOfBeats + 4));
     for(let i=0; i < rows.length; i++) {
         let labely = getYPosOfCell(i)
-        fill(green);
+        fill(black);
         textSize(22);
         text(soundNames[i], labelx, labely);
     }
