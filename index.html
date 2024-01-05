@@ -14,9 +14,9 @@
 <body>
     <div id="sideways">
         <div class="mini-spacer"></div>
-        <button id="playstop" class="playstop-button button-big" onClick="StartStop()">Play</button>
+        <button id="playstop" class="playstop-button button-big" onclick="togglePlaying()">Play</button>
         <div class="mini-spacer"></div>
-        <button id="clear" class="button-big" onClick="clearGrid()">Clear</button>
+        <button id="clear" class="button-big" onclick="clearGrid()">Clear</button>
         <div class="spacer"></div>
         <table>
             <tr>
@@ -49,7 +49,7 @@
             </tr>
             <tr>
                 <td>
-                    <input onchange="BPMchange()" type="range" min="20" max="240" value="120" class="slider" id="myRange">
+                    <input onchange="handleBpmChange()" type="range" min="20" max="240" value="120" class="slider" id="myRange">
                 </td>
             </tr>
         </table>
@@ -59,7 +59,7 @@
             </tr>
             <tr>
                 <td>
-                    <input onchange="Swingchange()" type="range" min="0" max="100" value="0" class="slider" id="mySwing">
+                    <input onchange="handleSwingChange()" type="range" min="0" max="100" value="0" class="slider" id="mySwing">
                 </td>
             </tr>
         </table>
@@ -80,7 +80,7 @@
     </div>
     <div id="error-text">
         <span id="error-text-value"></span>
-        <button id="error-clear-button" onClick="hideErrorText()">clear</button>
+        <button id="error-clear-button" onclick="hideErrorText()">clear</button>
     </div>
     <script src="./sketch.js"></script>
 </body>

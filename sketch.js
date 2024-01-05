@@ -6,6 +6,7 @@ let mySound4;
 let grey;
 let darkGrey;
 let green;
+let black;
 
 let pauseDrawing = false;
 let i = 0;
@@ -13,13 +14,13 @@ let Start = false;
 let Dsequence;
 let buttontext = document.getElementById("playstop");
 let BPM = document.getElementById("BPM");
-let BPMInt;
-let SwingInt;
+let currentBpm;
+let currentSwing;
 BPM.textContent = "" + document.getElementById("myRange").value;
 let Swing = document.getElementById("Swing");
 Swing.textContent = "" + document.getElementById("mySwing").value;
-SwingInt = (Swing.textContent * 1);
-BPMInt = (BPM.textContent * 1);
+currentSwing = (Swing.textContent * 1);
+currentBpm = (BPM.textContent * 1);
 let numOfBeats = 8;
 let currentBeat = 0;
 let SecondsPerMinute = 60;
@@ -27,7 +28,7 @@ const initialDrumCount = 4;
 const initialBarCount = 2;
 const beatsPerBar = 4;
 let currentRowCount = 4;
-let waitTime = ((SecondsPerMinute / BPMInt) * 1000) / 4;
+let waitTime = ((SecondsPerMinute / currentBpm) * 1000) / 4;
 const maxDrumCount = 8;
 const minDrumCount = 1;
 const maxBarCount = 4;
@@ -58,28 +59,34 @@ const soundNames=[
     'Toms',
     'Shaker',
     'Cymbal',
-
 ]
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 
-const Sequencer = async () => {
+
+/*
+    Run the drum sequencer playback
+*/
+const runSequencer = async () => {
     while (Start == true) {
         for (i = 0; i < numOfBeats; i++) {
             currentBeat = i;
-            PlaySounds(i);
+            playSounds(i);
             if (k % 2 == 1) {
-                await sleep(waitTime + SwingInt);
+                await sleep(waitTime + currentSwing);
             }
             else {
-                await sleep(waitTime - SwingInt);
+                await sleep(waitTime - currentSwing);
             }
             k++;
         }
     }
 }
 
-function PlaySounds(beat) {
+/*
+    Play sounds for each enabled cell
+*/
+function playSounds(beat) {
     for(let row = 0; row < currentRowCount; row++) {
         if (rows[row][beat]) {
             sounds[row].play();
@@ -87,28 +94,55 @@ function PlaySounds(beat) {
     }
 }
 
-function BPMchange() {
+/*
+    Event-handler for when BPM slider is changed by user
+*/
+function handleBpmChange() {
     BPM.textContent = "" + document.getElementById("myRange").value;
-    BPMInt = (BPM.textContent * 1);
+    currentBpm = (BPM.textContent * 1);
     BPM.textContent = "" + document.getElementById("myRange").value;
 
-    waitTime = ((SecondsPerMinute / BPMInt) * 1000) / 4
-    if (Start == true) {
-        //   clearInterval(Dsequence);
-        //   Dsequence=setInterval(every5seconds, waitTime);
+    waitTime = ((SecondsPerMinute / currentBpm) * 1000) / 4
+}
+
+/*
+    Event-handler for when Swing slider is changed by user
+*/
+function handleSwingChange() {
+    Swing.textContent = "" + document.getElementById("mySwing").value;
+    currentSwing = (Swing.textContent * 1);
+    Swing.textContent = "" + document.getElementById("mySwing").value;
+    console.log(currentSwing);
+    currentSwing = (((100 - currentSwing) * waitTime) / 100);
+    console.log("WaitTime=" + waitTime)
+    console.log("SwingInt=" + currentSwing)
+    currentSwing = (waitTime - currentSwing);
+    console.log("Final:" + currentSwing);
+}
+
+/*
+    Handles a mouse-click event and toggles state of cell if cursor is in that cell
+*/
+function handleMouseClicked() {
+    const mx = mouseX;
+    const my = mouseY;
+    const cellDiam = getCellDiam();
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 0; j < rows[i].length; j++) {
+            const cx = getXPosOfCell(j);
+            const cy = getYPosOfCell(i);
+            if (isPointInCell(mx, my, cx, cy, cellDiam)) {
+                rows[i][j] = !rows[i][j];
+            }
+        }
     }
 }
 
-function Swingchange() {
-    Swing.textContent = "" + document.getElementById("mySwing").value;
-    SwingInt = (Swing.textContent * 1);
-    Swing.textContent = "" + document.getElementById("mySwing").value;
-    console.log(SwingInt);
-    SwingInt = (((100 - SwingInt) * waitTime) / 100);
-    console.log("WaitTime=" + waitTime)
-    console.log("SwingInt=" + SwingInt)
-    SwingInt = (waitTime - SwingInt);
-    console.log("Final:" + SwingInt);
+/*
+    p5 method to handle a mouse-click (calls our custom handler)
+*/
+function mouseClicked() {
+    handleMouseClicked();
 }
 
 function stopPlaying() {
@@ -118,12 +152,15 @@ function stopPlaying() {
 }
 
 function startPlaying() {
-    Sequencer();
+    runSequencer();
     buttontext.textContent = "Stop";
     buttontext.style.borderColor='red';
 }
 
-function StartStop() {
+/*
+    Starts playback if not currently playing, otherwise stops playback
+*/
+function togglePlaying() {
     Start = !Start;
     if (Start == true) {
         startPlaying();
@@ -133,6 +170,9 @@ function StartStop() {
     }
 }
 
+/*
+    Load the drum sounds for each row that will be played if cell is active
+*/
 function preload() {
     soundFormats('wav', 'ogg');
     sounds = [];
@@ -142,30 +182,33 @@ function preload() {
     }
 }
 
+/*
+    p5 method to set up the program before running
+*/
 function setup() {
     createCanvas(windowWidth, windowHeight);
-
     frameRate(120);
-     
-    
-    
+
+    // Initialise colours used in grid
     grey = color(200, 200, 200);
     green = color(0, 255, 0);
     darkGrey = color(180, 180, 180);
+    black = color(0);
 
-    
     background(220, 220, 220);
     stroke(128, 128, 128);
     rectMode(CORNERS)
+    textAlign(LEFT, CENTER)
 
-    // Initialize grid
+    // Initialize a grid of inactive cells
     rows = Array(initialDrumCount)
         .fill(null)
         .map(() => Array(initialBarCount * beatsPerBar).fill(false)); // 2D array of false values
-
-       
 }
 
+/*
+    Add a row (drum) to the grid
+*/
 function addRow() {
     if (rows.length === maxDrumCount)
         return;
@@ -177,6 +220,15 @@ function addRow() {
     currentRowCount = currentRowCount + 1;
 }
 
+function loadDefaultSound(rowIndex) {
+    let s = loadSound(DEFAULT_SOUND_FILES[rowIndex] || DEFAULT_SOUND_FILES[0])
+    return s
+}
+
+
+/*
+    Remove last row (drum) from the grid
+*/
 function removeRow() {
     if (rows.length === minDrumCount)
         return;
@@ -185,14 +237,15 @@ function removeRow() {
     rows = rows.slice(0, rows.length - 1);
     sounds = sounds.slice(0, sounds.length - 1);
     currentRowCount = currentRowCount - 1;
-    
 }
 
+/*
+    Add n columns (beats) to the grid, where n is the number of beats in a bar
+*/
 function addBar() {
     if ((rows[0].length + beatsPerBar) / beatsPerBar > maxBarCount)
         return;
 
-    //stopPlaying()
     for (let i = 0; i < rows.length; i++) {
         for (let j = 0; j < beatsPerBar; j++) {
             rows[i].push(false);
@@ -201,11 +254,13 @@ function addBar() {
     numOfBeats = numOfBeats + 4;
 }
 
+/*
+    Remove n columns (beats) from the grid, where n is the number of beats in a bar
+*/
 function removeBar() {
     if ((rows[0].length - beatsPerBar) / beatsPerBar < minBarCount)
         return;
 
-    //stopPlaying()
     for (let i = 0; i < rows.length; i++) {
         for (let j = 0; j < beatsPerBar; j++) {
             rows[i].pop();
@@ -214,51 +269,28 @@ function removeBar() {
     numOfBeats = numOfBeats - 4;
 }
 
+/*
+    Draw the grid and drum labels
+*/
 function draw() {
     if (!pauseDrawing) {
         background(220);
         drawGrid();
     }
-    if(numOfBeats==4){
-        for(let i=0; i<rows.length; i++){
-            fill(0);
-            textSize(22);
-            text(soundNames[i], 471, i*120+55);
-            
-        }
-        
-    }
-    if(numOfBeats==8){
-        for(let i=0; i<rows.length; i++){
-            fill(0);
-            textSize(22);
-            text(soundNames[i], 671, i*80+55);
-            
-        }
-        
-    }
-    if(numOfBeats==12){
-        for(let i=0; i<rows.length; i++){
-            fill(0);
-            textSize(12);
-            text(soundNames[i], 771, i*65+40);
-            
-        }
-        
-    }
-    if(numOfBeats==16){
-        for(let i=0; i<rows.length; i++){
-            fill(0);
-            textSize(12);
-            text(soundNames[i], 851, i*50+45);
-            
-        }
-        
-    }
-    
-    }
-    
 
+    let cellDiam = getCellDiam();
+    let labelx = (cellDiam * numOfBeats) + (cellGapSize * (numOfBeats + 4));
+    for(let i=0; i < rows.length; i++) {
+        let labely = getYPosOfCell(i)
+        fill(black);
+        textSize(22);
+        text(soundNames[i], labelx, labely);
+    }
+}
+
+/*
+    Draws grid to fit current window size
+*/
 function drawGrid() {
     const cellDiam = getCellDiam();
 
@@ -276,36 +308,40 @@ function drawGrid() {
             const x = getXPosOfCell(j);
             const y = getYPosOfCell(i);
             const active = rows[i][j];
-            cell(x, y, cellDiam, active);
-        }
-    }
-    
-    
-}
-
-function mouseClicked() {
-    const mx = mouseX;
-    const my = mouseY;
-    const cellDiam = getCellDiam();
-    for (let i = 0; i < rows.length; i++) {
-        for (let j = 0; j < rows[i].length; j++) {
-            const cx = getXPosOfCell(j);
-            const cy = getYPosOfCell(i);
-            if (isPointInCell(mx, my, cx, cy, cellDiam)) {
-                rows[i][j] = !rows[i][j];
-            }
+            drawCell(x, y, cellDiam, active);
         }
     }
 }
 
-function windowResized() {
+/*
+    Determine if a point (px, py) is inside a circle of radius cellDiam with center (cx, cy)
+    Used for determining if cursor is inside a given cell on mouse-click
+*/
+function isPointInCell(px, py, cx, cy, cellDiam) {
+    return dist(px, py, cx, cy) <= cellDiam / 2;
+}
+
+/*
+    Event-handler for a window resize (rescales the grid to fit new size)
+*/
+function handleWindowResize() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
-function cell(x, y, diam, active) {
+/*
+    Draw a single cell for the grid
+*/
+function drawCell(x, y, diam, active) {
     fill(active ? green : grey);
     circle(x, y, diam);
 }
+
+
+/*
+    ==============================================================
+    Methods used for determining size and layout of the grid cells
+    ==============================================================
+*/
 
 function getXPosOfCell(cell_index) {
     const cellDiam = getCellDiam();
@@ -322,25 +358,25 @@ function getCellDiam() {
     return (gridWidth) / (rows[0].length + cellGapSize);
 }
 
-function isPointInCell(px, py, cx, cy, cellDiam) {
-    return dist(px, py, cx, cy) <= cellDiam / 2;
-}
 
-function getCurrentBarCount() {
-    return rows.length / beatsPerBar;
-}
+/*
+    =====================================================
+    Methods used for importing/exporting sequence as file
+    =====================================================
+*/
 
-function loadDefaultSound(rowIndex) {
-    let s = loadSound(DEFAULT_SOUND_FILES[rowIndex] || DEFAULT_SOUND_FILES[0])
-    return s
-}
-
+/*
+    Export the current sequence as a file
+*/
 function saveFile() {
     let content = getExportFileContent()
     let filename = document.getElementById("filename").value || "my_sequence.txt";
     saveStrings(content, filename, "txt")
 }
 
+/*
+    Get the text-content of file to be exported
+*/
 function getExportFileContent() {
     let lines = []
     for(let i = 0; i < rows.length; i++) {
@@ -353,31 +389,20 @@ function getExportFileContent() {
     return lines;
 }
 
-function showErrorText() {
-    let e = document.getElementById('error-text')
-    e.style.display = "block"
-}
 
-function hideErrorText() {
-    let e = document.getElementById('error-text')
-    e.style.display = "none"
-}
-
-function setErrorText(text) {
-    let e = document.getElementById('error-text-value')
-    e.innerHTML = text;
-}
-
+/*
+    Open dialog to select a local file and load the sequence from it
+*/
 async function importFile() {
     pauseDrawing = true
 
+    // Open file selection dialog and read the selected file
     let f = document.getElementById('import').files[0]
     let text = await f.text();
-
     lines = text.trim().split('\n');
-    console.log(lines)
-    let validation = validateFileText(lines);
 
+    // Check if file is a valid sequence and if not, display reason to user
+    let validation = validateFileText(lines);
     if (validation !== true) {
         setErrorText("Failed to import file: " + validation[1])
         showErrorText();
@@ -385,8 +410,8 @@ async function importFile() {
         return;
     }
 
+    // File has a valid sequence, so load the sequence to the grid
     newstate = []
-
     for (let i = 0; i < lines.length && i < maxDrumCount; i++) {
         newstate.push([])
         for (let j = 0; j < lines[i].length && j < maxBarCount * beatsPerBar; j++) {
@@ -399,27 +424,27 @@ async function importFile() {
     pauseDrawing = false;
 }
 
+/*
+    Determine if file is a valid sequence and if not try to return reason
+*/
 function validateFileText(lines) {
     try {
         for (let i = 0; i < lines.length; i++) {
             lines[i] = lines[i].trim()
         }
-
         if (lines.length === 0) {
             return [false, "File must have one or more lines"];
         }
-
         if (lines[0].length === 0) {
             return [false, "File must have one or more beats"];
         }
-        
+    
         for (let ln of lines) {
             console.log("line", ln)
             if (ln.length !== lines[0].length) {
                 return [false, "All lines must have equal length"];
             }
         }
-
         for (let ln of lines) {
             for (let c of ln) {
                 if (c !== '0' && c !== '1') {
@@ -427,17 +452,18 @@ function validateFileText(lines) {
                 }
             }
         }
-
         if (lines[0].length % beatsPerBar !== 0) {
             return [false, `Number of beats must be divisible by ${beatsPerBar}`]
         }
     } catch (error) {
         return [false, "Unknown error"]
     }
-
     return true
 }
 
+/*
+    Reset all cells to inactive
+*/
 function clearGrid() {
     for (let i = 0; i < rows.length; i++) {
         for (let j = 0; j < rows[i].length; j++) {
@@ -446,6 +472,9 @@ function clearGrid() {
     }
 }
 
+/*
+    Set cells active/inactive based on data
+*/
 function setGridState(vals) {
     pauseDrawing = true;
 
@@ -460,4 +489,26 @@ function setGridState(vals) {
     }
 
     pauseDrawing = false;
+}
+
+
+/*
+    =========================================================
+    Methods used for displaying error information to the user
+    =========================================================
+*/
+
+function showErrorText() {
+    let e = document.getElementById('error-text')
+    e.style.display = "block"
+}
+
+function hideErrorText() {
+    let e = document.getElementById('error-text')
+    e.style.display = "none"
+}
+
+function setErrorText(text) {
+    let e = document.getElementById('error-text-value')
+    e.innerHTML = text;
 }
